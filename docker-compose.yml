@@ -1,0 +1,162 @@
+version: '3.1'
+
+services:
+
+    reverse-proxy:
+      image: jwilder/nginx-proxy:alpine
+      container_name: 'Reverse-Proxy'
+      restart: always
+      ports:
+        - '80:80'
+        - '443:443'
+      volumes:
+        - certs:/etc/nginx/certs:ro
+        - vhostd:/etc/nginx/vhost.d
+        - html:/usr/share/nginx/html
+        - /var/run/docker.sock:/tmp/docker.sock:ro
+
+    nginx:
+      image: nginx
+      container_name: Nginx-Container
+      restart: always
+      volumes:
+        - ~/startbootstrap-sb-admin-2:/usr/share/nginx/html
+      environment:
+        - VIRTUAL_HOST=portal.midominiomtie.net
+
+    nginx2:
+      image: nginx
+      container_name: Nginx-Container-N02
+      restart: always
+      volumes:
+        - ~/startbootstrap-sb-admin-2:/usr/share/nginx/html
+      environment:
+        - VIRTUAL_HOST=portal.midominiomtie.net
+
+    nginx3:
+      image: nginx
+      container_name: Nginx-Container-N03
+      restart: always
+      volumes:
+        - ~/startbootstrap-sb-admin-2:/usr/share/nginx/html
+      environment:
+        - VIRTUAL_HOST=portal.midominiomtie.net
+
+    nginx4:
+      image: nginx
+      container_name: Nginx-Container-N04
+      restart: always
+      volumes:
+        - ~/startbootstrap-sb-admin-2:/usr/share/nginx/html
+      environment:
+        - VIRTUAL_HOST=portal.midominiomtie.net
+
+    wordpress:
+      image: wordpress:php7.2-apache
+      container_name: 'WordPress'
+      environment:
+        - WORDPRESS_DB_HOST=mysql
+        - WORDPRESS_DB_USER=root
+        - WORDPRESS_DB_PASSWORD=mysqladmin
+        - WORDPRESS_DB_NAME=wordpress
+        - VIRTUAL_HOST=wordpress.midominiomtie.net
+      links:
+        - mysql:mysql
+      depends_on: 
+        - mysql
+
+    angular:
+      container_name: 'App-Angular-N01'
+      build:
+        context: ./app-angular
+        dockerfile: Dockerfile
+      restart: always
+      environment:
+        - VIRTUAL_HOST=angular.midominiomtie.net
+
+    netcore:
+      container_name: 'API-NETCore'
+      build:
+        context: ./apinetcore
+        dockerfile: Dockerfile
+      restart: always
+      environment:
+        - VIRTUAL_HOST=apinetcore.midominiomtie.net
+
+    nodejs:
+      container_name: 'API-NodeJS'
+      build:
+        context: ./deploy-node
+        dockerfile: Dockerfile
+      restart: always
+      environment:
+        - VIRTUAL_HOST=apinode.midominiomtie.net
+
+    mysql:
+      image: mysql:8
+      command: --default-authentication-plugin=mysql_native_password
+      container_name: MySQL-Container
+      restart: always
+      ports:
+        - 3306:3306
+      environment:
+        MYSQL_ROOT_PASSWORD: "mysqladmin"
+        MYSQL_DATABASE: "wordpress"
+      volumes:
+        - ~/volumes/mysql/data:/var/lib/mysql
+
+    mongo:
+      image: mongo
+      command: mongod --auth
+      container_name: Mongo-Container
+      restart: always
+      ports:
+        - 27017:27017
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: "dba-root"
+        MONGO_INITDB_ROOT_PASSWORD: "mongoadmin"
+      volumes:
+        - ~/volumes/mongo/data/db:/data/db
+
+    mssql:
+      image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+      container_name: MSSQL-Container
+      restart: always
+      ports:
+        - 1433:1433
+      environment:
+        ACCEPT_EULA: "Y"
+        SA_PASSWORD: "@Hola1234"
+        MSSQL_PID: "Express"
+      volumes:
+        - ~/volumes/mssql/data:/var/opt/mssql
+
+    netdata:
+      container_name: 'MONITOR'
+      image: netdata/netdata
+      restart: always
+      expose:
+        - "19999"
+      volumes:
+        - /etc/passwd:/host/etc/passwd:ro
+        - /etc/group:/host/etc/group:ro
+        - /proc:/host/proc:ro
+        - /sys:/host/sys:ro
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        - netdata-etc:/etc/netdata
+      cap_add:
+        - SYS_PTRACE
+      security_opt:
+        - apparmor=unconfined
+      environment:
+        - VIRTUAL_HOST=monitor.midominiomtie.net
+        - VIRTUAL_PORT=19999
+        - DOCKER_HOST=proxy:2375
+        - PGID=999
+        - VIRTUALIZATION=kvm
+
+volumes:
+    certs:
+    html:
+    vhostd:
+    netdata-etc:
