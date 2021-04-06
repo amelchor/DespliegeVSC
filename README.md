@@ -6,10 +6,17 @@
 
 ### Clonar repositorio
 ```
-git clone https://github.com/jlrosasp/deploy-mtie.git
-cd deploy-mtie
+git clone https://github.com/amelchor/DespliegeVSC.git
+cd DespliegeVSC
 ```
+### Para generar este codigo previamente clonar los codigos del repositorio de Peimbert
 
+```
+git clone https://github.com/jlrosasp/app-angular.git
+git clone https://github.com/jlrosasp/deploy-node.git
+git clone https://github.com/jlrosasp/apinetcore.git
+git clone https://github.com/startbootstrap/startbootstrap-sb-admin-2
+```
 ### Mover carpetas a directorio raíz
 ```
 sudo mv apinetcore/ ../
